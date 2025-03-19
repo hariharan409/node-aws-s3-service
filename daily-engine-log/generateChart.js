@@ -17,7 +17,7 @@ exports.generateChart = async() => {
     const fileBuffer = await streamToBuffer(response.Body);
 
     // spawn the python process
-    const pythonProcess = spawn('python',["add_chart_to_excel.py", logDate]);
+    const pythonProcess = spawn('python',["./python/add_chart_to_excel.py", logDate]);
 
     // Send the file buffer via stdin
     pythonProcess.stdin.write(fileBuffer);

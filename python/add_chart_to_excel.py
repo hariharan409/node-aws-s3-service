@@ -2,7 +2,7 @@ import sys
 from io import BytesIO
 from openpyxl import load_workbook
 from openpyxl.chart import LineChart, Reference, Series
-from openpyxl.utils import get_column_letter  # FIX: Convert column index to Excel letter
+from openpyxl.utils import get_column_letter  # Proper column conversion
 
 if __name__ == "__main__":
     # Step 1: Get log date from sys.argv
@@ -19,13 +19,23 @@ if sheet_name not in wb.sheetnames:
     raise ValueError(f"Sheet '{sheet_name}' not found in the workbook.")
 ws = wb[sheet_name]
 
-def create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="A25", row_spacing=15, col_spacing=10):
+def create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="A25", row_spacing=15, col_spacing=14):
+    """
+    Create multiple line charts in a 3-row by 4-column layout with proper alignment.
+    
+    :param ws: The worksheet object
+    :param start_data_row: First data row containing the titles
+    :param end_data_row: Last data row containing the titles
+    :param start_chart_cell: Starting cell for chart placement (e.g., "A25")
+    :param row_spacing: Number of rows between each chart vertically
+    :param col_spacing: Number of columns between each chart horizontally
+    """
 
     # Define the layout (3 rows x 4 columns)
     charts_per_row = 4  # 4 columns per row
 
     # Extract starting chart position
-    start_col = ord(start_chart_cell[0]) - ord('A') + 1  # Convert 'B' -> 2
+    start_col = ord(start_chart_cell[0]) - ord('A') + 1  # Convert 'A' -> 1
     start_row = int(''.join(filter(str.isdigit, start_chart_cell)))  # Extract row number (25)
 
     # Create a reference for the x-axis categories from S3:X3
@@ -63,13 +73,13 @@ def create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="
             chart.series.append(series)
 
         # Compute grid position
-        row_pos = chart_index // charts_per_row  # Determine row position
-        col_pos = chart_index % charts_per_row   # Determine column position
+        row_pos = chart_index // charts_per_row  # Determine row position (0,1,2)
+        col_pos = chart_index % charts_per_row   # Determine column position (0,1,2,3)
 
         # Compute anchor cell using `get_column_letter`
         anchor_row = start_row + (row_pos * row_spacing)  # Adjust by row_spacing
         anchor_col = start_col + (col_pos * col_spacing)  # Adjust by col_spacing
-        anchor_cell = f"{get_column_letter(anchor_col)}{anchor_row}"  # FIX: Use `get_column_letter`
+        anchor_cell = f"{get_column_letter(anchor_col)}{anchor_row}"  # Convert to Excel column letter format
 
         # Add chart to the worksheet
         ws.add_chart(chart, anchor_cell)
@@ -78,7 +88,7 @@ def create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="
         chart_index += 1
 
 # Step 4: Process the Excel file (add charts)
-create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="A25", row_spacing=15, col_spacing=10)
+create_line_charts(ws, start_data_row=4, end_data_row=16, start_chart_cell="A25", row_spacing=15, col_spacing=14)
 
 # Step 5: Save the modified file to an in-memory buffer
 output_buffer = BytesIO()

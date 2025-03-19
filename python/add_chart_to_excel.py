@@ -23,6 +23,15 @@ def create_line_charts_fixed(ws, start_data_row=4, end_data_row=16):
     # X-axis categories: cells S3:X3 (columns 19–24, row 3)
     x_ref = Reference(ws, min_col=19, max_col=24, min_row=3, max_row=3)
     
+    # Custom colors for each engine (hex codes without '#')
+    engine_colors = [
+        "FF00FF",
+        "3333FF",
+        "FF6600",
+        "7030A0",
+        "064028",
+    ]
+    
     chart_index = 0
     total_charts = end_data_row - start_data_row + 1
     
@@ -51,16 +60,22 @@ def create_line_charts_fixed(ws, start_data_row=4, end_data_row=16):
                 Reference(ws, min_col=31, max_col=36, min_row=data_row, max_row=data_row), # Engine 5: AE:AJ
             ]
             
-            for ref, eng_title in zip(eng_refs, ["Engine 1", "Engine 2", "Engine 3", "Engine 4", "Engine 5"]):
+            # Apply custom line colors to each series
+            for ref, eng_title, color in zip(
+                eng_refs,
+                ["Engine 1", "Engine 2", "Engine 3", "Engine 4", "Engine 5"],
+                engine_colors
+            ):
                 series = Series(ref, title=eng_title)
                 series.graphicalProperties.line.smooth = False
+                series.graphicalProperties.line.solidFill = color  # Set the line color
                 chart.series.append(series)
             
-            # Fix chart dimensions (inches in Excel, but openpyxl approximates)
+            # Fix chart dimensions
             chart.width = 15
             chart.height = 7
             
-            # Add the chart at the fixed anchor cell
+            # Place the chart in the fixed anchor cell
             anchor_cell = anchor_grid[row_idx][col_idx]
             ws.add_chart(chart, anchor_cell)
             
@@ -75,13 +90,13 @@ if __name__ == "__main__":
         raise ValueError(f"Sheet '{sheet_name}' not found in the workbook.")
     ws = wb[sheet_name]
     
-    # 1) Set uniform column widths so spacing is truly consistent
+    # 1) Set uniform column widths so spacing is consistent
     set_uniform_column_widths(ws, start_col="A", end_col="AE", width=15)
     
-    # 2) Create the charts in a fixed grid
+    # 2) Create the charts in a fixed grid with custom colors
     create_line_charts_fixed(ws, start_data_row=4, end_data_row=16)
     
-    # 3) Save
+    # 3) Save to stdout
     output_buffer = BytesIO()
     wb.save(output_buffer)
     sys.stdout.buffer.write(output_buffer.getvalue())

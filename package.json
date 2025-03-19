@@ -1,0 +1,23 @@
+{
+  "name": "aws-service",
+  "version": "1.0.0",
+  "description": "a server used to communicate with aws services to gfetch and update data on the DB",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./server.js"
+  },
+  "keywords": [
+    "node",
+    "aws",
+    "s3"
+  ],
+  "author": "harish",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.730.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
+  }
+}

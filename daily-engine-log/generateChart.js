@@ -2,11 +2,12 @@ const {spawn} = require("child_process");
 const fs = require("fs");
 const { getObjectFromS3Bucket } = require("../common/aws-s3-config/s3-operations/s3Operation");
 const moment = require("moment-timezone");
+const path = require("path");
 
 
 
 exports.generateChart = async() => {
-    const logDate = '01-03-2025';
+    const logDate = '02-03-2025';
     const bucketName = process.env.AWS_S3_EXCEL_UPLOAD_BUCKET_NAME;
     let subFolderPath = process.env.AWS_S3_EXCEL_UPLOAD_FOLDER_NAME + "" + moment(logDate,"DD-MM-YYYY").format("YYYY");
     let filePath = `${subFolderPath}/${moment(logDate,"DD-MM-YYYY").format("MMM").toLowerCase()}.xlsx`;
@@ -17,7 +18,8 @@ exports.generateChart = async() => {
     const fileBuffer = await streamToBuffer(response.Body);
 
     // spawn the python process
-    const pythonProcess = spawn('python',["./python/add_chart_to_excel.py", logDate]);
+    const pythonExecutable = path.join(process.cwd(),"python", ".venv", "Scripts", "python.exe");
+    const pythonProcess = spawn(pythonExecutable,["./python/add_chart_to_excel.py", logDate]);
 
     // Send the file buffer via stdin
     pythonProcess.stdin.write(fileBuffer);

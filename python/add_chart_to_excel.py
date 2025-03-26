@@ -49,7 +49,6 @@ def create_line_charts_fixed(ws, start_data_row=4, end_data_row=16):
             chart.x_axis.number_format = "@"
             chart.x_axis.delete = False
             chart.y_axis.delete = False
-            chart.set_categories(x_ref)
             
             # Data references for each engine on the current row
             eng_refs = [
@@ -59,6 +58,19 @@ def create_line_charts_fixed(ws, start_data_row=4, end_data_row=16):
                 Reference(ws, min_col=25, max_col=30, min_row=data_row, max_row=data_row), # Engine 4: Y:AD
                 Reference(ws, min_col=31, max_col=36, min_row=data_row, max_row=data_row), # Engine 5: AE:AJ
             ]
+            # temporary Reference to make sure the X-axis labels appear
+            tempRef = Reference(ws, min_col=100, max_col=100, min_row=100, max_row=100)
+
+            chart.add_data(tempRef,titles_from_data=True)
+            chart.set_categories(x_ref)
+
+            # Remove the unwanted empty series from the legend
+            # The temporary reference creates one empty series, so we get the last series
+            empty_series = chart.series[-1]
+
+            # Now we make sure this series doesn't appear in the legend
+            empty_series.graphicalProperties.line.solidFill = 'FFFFFF'  # Optional: Set a white color for the line to hide it visually
+            chart.legend.include_in_legend = False  # Removes this series from the legend
             
             # Apply custom line colors to each series
             for ref, eng_title, color in zip(
